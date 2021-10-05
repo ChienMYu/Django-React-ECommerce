@@ -2,10 +2,10 @@ from rest_framework import serializers
 
 #import models 
 from django.apps import apps
-from .models import Cart, Product, Comment
+from .models import Cart, Product, Comment, Post, Like
 from django.contrib.auth.models import User
 
-Post = apps.get_model('blog', 'Post')
+
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:

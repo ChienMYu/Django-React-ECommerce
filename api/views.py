@@ -5,8 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 #import models
 from django.apps import apps
 from rest_framework.serializers import Serializer
-from .models import Cart, Product, Comment
-Post = apps.get_model('blog', 'Post')
+from .models import Cart, Product, Comment, Post, Like
 from rest_framework.authtoken.models import Token
 
 #import serializers
@@ -204,8 +203,48 @@ def myPosts(request):
 @api_view(["DELETE"])
 @permission_classes((IsAuthenticated,))
 def deleteComment(request, post_id):
+    user = request.user
+    print(user)
     comment = Comment.objects.get(id=request.data['comment_id'])
-    if comment:
+    if comment.user == user:
         comment.delete()
         return Response({'response': "Successfully removed comment."})
     return Response({'response': "You are not able to remove this comment."})
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def addLike(request, post_id):
+    user = request.user
+    post = Post.objects.get(id=post_id)
+    if user in post.liked.all():
+        post.liked.remove(user)
+    else:
+        post.liked.add(user)
+    like, created = Like.objects.get_or_create(user=user, post_id=post_id)
+    if created == False:
+        if like.value == 'Like':
+            like.value="Unlike"
+            like.save()
+            return Response({'response': "You have unliked the post."})
+        else:
+            like.value = 'Like'
+            like.save()
+            return Response({'response': "You have liked the post."})
+    like.save()
+    return Response({'response': "You have created a new like entry."})
+
+@api_view(["GET"])
+def getLikes(request,post_id):
+    post = Post.objects.get(id=post_id)
+    likes = post.liked.all().count()
+    return Response(likes)
+
+@api_view(["DELETE"])
+@permission_classes((IsAuthenticated,))
+def emptyCart(request):
+    user = request.user
+    cart = Cart.objects.filter(user=user)
+    if cart:
+        cart.delete()
+        return Response({'response': "Successfully removed all items from cart."})
+    return Response({'response': "You do not have any items to remove from your cart"})

@@ -25,4 +25,7 @@ urlpatterns = [
     path('posts/<int:post_id>/comment/add', views.addComment, name='api-addcomment'),
     path('myposts/', views.myPosts, name='api-myposts'),
     path('posts/<int:post_id>/comment/delete/', views.deleteComment, name='api-deletecomment'),
+    path('posts/<int:post_id>/like/', views.addLike, name='api-addlike'),
+    path('posts/<int:post_id>/likes/', views.getLikes, name='api-likes'),
+    path('cart/empty/', views.emptyCart, name='api-emptycart'),
 ]
